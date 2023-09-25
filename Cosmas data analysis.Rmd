@@ -1,0 +1,26 @@
+---
+title: "Data analysis"
+author: "Cosmas"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = F,message = F,comment = NA)
+```
+
+```{r}
+rm(list=ls())
+library(pacman)
+p_load(readxl,tidyverse,dplyr,reshape2,ggplot2,plotly)
+DataRural<-read_excel("Data/Rural-population-households-density-by-county.xlsx")
+DataUrban<-read_excel("Data/Urban-population-households-density-by-county.xlsx")
+DataRural['place']<-"Rural"
+DataUrban['place']<-"Urban"
+DataUrbanGender<-read_excel("Data/Population-in-urban-centers-by-sex-and-urban-center.xlsx")
+DataFinal<-rbind(DataRural,DataUrban)
+
+
+```
+
