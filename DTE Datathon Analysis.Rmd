@@ -1,0 +1,33 @@
+---
+title: "Rural Urban dynamics (DTE Datathon)"
+author: "Group 7"
+date: "2023-09-26"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# introduction
+```{r}
+library(readxl)
+Dataset <- read_excel("Dataset/Dataset.xlsx")
+```
+
+
+# data
+## data collection and cleaning
+
+## EDA
+
+## Rural-Urban population dynamics
+
+## Rural-Urban health dynamics
+
+## Rural-Urban Education dynamics
+
+## Rural-Urban Misc
+
+# findings and conclusion
+
