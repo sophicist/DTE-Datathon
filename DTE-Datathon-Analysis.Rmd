@@ -1,0 +1,181 @@
+---
+title: "Rural Urban dynamics (DTE Datathon)"
+author: "Group 7"
+date: "2023-09-26"
+output:
+  pdf_document: default
+  word_document: default
+  
+header-includes:
+- \usepackage{fancyhdr}
+- \usepackage{xcolor}
+- \usepackage{sectsty}
+- \sectionfont{\color[RGB]{21,97,109}}
+- \subsectionfont{\color[RGB]{255,125,0}}
+- \subsubsectionfont{\color[RGB]{255,236,209}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,warning =F,message = F,comment = NA)
+```
+
+# introduction
+
+This analysis is intended for the DTE datathon, which aims to cultivate a data-driven, innovative, and collaborative environment for creatively addressing societal issues and producing actionable solutions.
+
+```{r}
+
+library(tidyverse)
+library(gridExtra)
+library(readxl)
+library(reshape2)
+library(janitor)
+library(ggthemes)
+
+library(knitr)
+# library(kableExtra)
+
+df <- data.frame(
+  Details = c("Time Frame","Deadline","Software/Tools"),
+  values  = c("1 Week","28th September","R - studio")
+)
+df %>% kable(caption = "The rules of the datathon")
+```
+
+
+> `The objective:` The objective of this challenge is to analyze open data sets in Kenya using
+real-world data. You are therefore to explore, visualize, and draw insights from the
+provided dataset to provide better insights to different stakeholders on how
+urbanization is impacting different aspects of Kenyan society. Participants should work
+in teams and are encouraged to utilize technologies such as big data, machine learning,
+and artificial Intelligence that train test, and evaluate multiple data sets to uncover
+innovative solutions.
+
+
+
+```{r}
+
+colors <- c('#BC5308', '#FFECD1', '#C5CAB8', '#FF7D00', '#8AA79F', '#FFB569', '#15616D', '#001524')
+
+df <- read_excel("Dataset/Dataset.xlsx")
+df %>% select(1:7) %>% head() %>% knitr::kable(caption = "A sample of the data")
+```
+
+
+## data
+
+As per the rules, we sourced the data from KNBS on the following website: [KNBS Data](https://knbs.or.ke/data-tables/?cp=2).
+
+Additionally, we obtained supplementary data from the following website: [Kenya County Fact Sheets Report (PDF)](https://cra.go.ke/wp-content/uploads/2022/06/Kenya-County-fact-sheets-Report-Final-Res.pdf).
+
+The collected data encompasses a wide range of aspects of Kenyan life, including population, GDP, infrastructure, education, healthcare, and employment.
+
+
+# data sourcing and cleaning
+
+The data collection process was primarily manual, and it followed the following general steps:
+
+1. **Data Compilation:** We collaborated in Google Sheets to collect various data points simultaneously, gradually building up the dataset we needed.
+
+2. **Data Cleaning:** We employed a manual query system to identify and address any anomalies or outliers in the dataset. This process involved thorough cross-checking to ensure data accuracy.
+
+3. **Feature Engineering:** We created additional columns in the dataset, such as:
+
+   - Total Population: $totalPopulation = femalePopulation + malePopulation$
+   
+   - Urban-Rural Classification: $urbanRural = \frac{urbanPopulation}{totalPopulation}$
+
+   Based on the urban-rural classification, we categorized certain counties as either rural or urban. Counties were classified as fully urban if the urban population exceeded 40% of the total population.
+
+
+## Rural-Urban population dynamics
+
+## Rural-Urban health dynamics
+
+## Rural-Urban Education dynamics
+
+### Population with and without education
+
+#### Primary
+
+```{r,fig.width = 12,fig.height =8}
+# find an arrangement index
+y <- df %>%  select(County,`Ppn with primary(%)`,Status) %>% arrange(`Ppn with primary(%)`)
+y$County <- factor(y$County,levels = y$County)
+
+
+
+# create a graph for urban
+rural <- y %>% filter(Status == 'Rural') %>% mutate(perc = paste(`Ppn with primary(%)`,'%')) %>% 
+  ggplot(aes(x = County,y  =`Ppn with primary(%)`,label = perc))+geom_bar(stat = 'identity',fill = colors[7],show.legend = FALSE)+coord_flip()+
+  #scale_fill_manual(values = c(colors[1],colors[7]))+
+  labs(title = "Population with and without primary education\n (Rural Areas)")+scale_y_continuous(labels = scales::percent_format(scale = 1))+
+  geom_text(aes(y = `Ppn with primary(%)` - 2, color = colors[2]), size = 3, position = position_dodge(width = 0.9),show.legend = FALSE)+theme(
+    plot.title = element_text(hjust = 0.7)  # Center the title
+  )+
+  theme_hc()
+
+# create a graph for urban
+urban <- y %>% filter(Status == 'Urban') %>% mutate(perc = paste(`Ppn with primary(%)`,'%')) %>% 
+  ggplot(aes(x = County,y  =`Ppn with primary(%)`,label = perc))+geom_bar(stat = 'identity',fill = colors[7],show.legend = FALSE)+coord_flip()+
+  #scale_fill_manual(values = c(colors[1],colors[7]))+
+  labs(title = "Population with and without primary education\n (Urban Areas)")+scale_y_continuous(labels = scales::percent_format(scale = 1))+
+  geom_text(aes(y = `Ppn with primary(%)` - 2, color = colors[2]), size = 3, position = position_dodge(width = 0.9),show.legend = FALSE)+theme(
+    plot.title = element_text(hjust = 0.7)  # Center the title
+  )+
+  theme_hc()
+grid.arrange(rural,urban,ncol =2)
+
+```
+
+#### Secondary
+
+```{r,fig.width = 12,fig.height =8}
+# find an arrangement index
+y <- df %>%  select(County,`Ppn with secondary%`,Status) %>% arrange(`Ppn with secondary%`)
+y$County <- factor(y$County,levels = y$County)
+
+
+
+# create a graph for urban
+rural <- y %>% filter(Status == 'Rural') %>% mutate(perc = paste(`Ppn with secondary%`,'%')) %>% 
+  ggplot(aes(x = County,y  =`Ppn with secondary%`,label = perc))+geom_bar(stat = 'identity',fill = colors[7],show.legend = FALSE)+coord_flip()+
+  #scale_fill_manual(values = c(colors[1],colors[7]))+
+  labs(title = "Population with and without secondary education\n (Rural Areas)")+scale_y_continuous(labels = scales::percent_format(scale = 1))+
+  geom_text(aes(y = `Ppn with secondary%` - 2, color = colors[2]), size = 3, position = position_dodge(width = 0.9),show.legend = FALSE)+theme(
+    plot.title = element_text(hjust = 0.7)  # Center the title
+  )+
+  theme_hc()
+
+# create a graph for urban
+urban <- y %>% filter(Status == 'Urban') %>% mutate(perc = paste(`Ppn with secondary%`,'%')) %>% 
+  ggplot(aes(x = County,y  =`Ppn with secondary%`,label = perc))+geom_bar(stat = 'identity',fill = colors[7],show.legend = FALSE)+coord_flip()+
+  #scale_fill_manual(values = c(colors[1],colors[7]))+
+  labs(title = "Population with and without secondary education\n (Urban Areas)")+scale_y_continuous(labels = scales::percent_format(scale = 1))+
+  geom_text(aes(y = `Ppn with secondary%` - 2, color = colors[2]), size = 3, position = position_dodge(width = 0.9),show.legend = FALSE)+theme(
+    plot.title = element_text(hjust = 0.7)  # Center the title
+  )+
+  theme_hc()
+grid.arrange(rural,urban,ncol =2)
+
+```
+
+```{r}
+df %>% select(Status,`No Primary`,`Number secondary`) %>% 
+  melt(id.vars = 'Status') %>% 
+  ggplot(aes(x = variable,y =value,fill = Status))+geom_boxplot(width = 0.3, size = 0.7)+
+  theme_hc()+
+  labs(title = "Number of primary and secondary schools per county \n(rural vs urban )")+
+  theme(
+    plot.title = element_text(hjust = 0.5)  # Center the title
+  )+
+  scale_fill_manual(values = c(colors[1],colors[7]))
+```
+
+
+
+
+## Rural-Urban Misc
+
+# findings and conclusion
+
