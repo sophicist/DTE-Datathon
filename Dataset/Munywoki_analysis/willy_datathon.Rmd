@@ -1,0 +1,231 @@
+---
+title: "DATATHON"
+author: "William"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, comment =  NA, message = F, warning = F)
+```
+
+```{r}
+# load the dataset
+setwd("D:/Willy/datathon")
+# list.files()
+library(readxl)
+library(gridExtra)
+library(tidyverse)
+kenya1<- read_excel("Dataset.xlsx", sheet = "data")
+colors = c('#15616D','#BC5308','#C5CAB8','#8AA79F','#FFECD1','#FF7D00', '#FFB569','#001524')
+# colnames(kenya1)
+
+```
+
+```{r fig.width=12,fig.height=8}
+water_county <-kenya1 %>% 
+  filter(Status== "Rural") %>% 
+  select("County","Status","Households with water %")
+
+fig1<- ggplot(water_county, aes(x = reorder(County, -`Households with water %`), y = `Households with water %`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill = '#15616D') +
+  geom_text(aes(label = `Households with water %`), vjust = -0.5,hjust =0.5, size = 3)+
+  labs(title = "Percentage of Households with Water by County",
+       x = "County",
+       y = "Percentage of Households with Water") +
+  theme_minimal()+
+  coord_flip()+
+   theme(panel.grid = element_blank())
+```
+
+
+```{r fig.width=12,fig.height=8}
+water_county <-kenya1 %>% 
+  filter(Status== "Urban") %>% 
+  select("County","Status","Households with water %")
+
+fig2<- ggplot(water_county, aes(x = reorder(County, -`Households with water %`), y = `Households with water %`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE,fill = '#BC5308') +
+  geom_text(aes(label = `Households with water %`), vjust = -0.5,hjust =0.5, size = 3)+
+  labs(title = "Percentage of Households with Water by County",
+       x = "County",
+       y = "Percentage of Households with Water") +
+  theme_minimal()+
+  coord_flip()+
+  theme(panel.grid = element_blank())
+```
+
+
+```{r fig.width=12,fig.height=8}
+
+grid.arrange(fig1,fig2,ncol=1)
+```
+
+```{r}
+# water_county
+```
+
+
+```{r fig.width=12,fig.height=8}
+Electricity_county<-kenya1 %>% 
+  filter(Status=="Rural") %>% 
+  select("County","Status","Household with Electricity %") %>% 
+  arrange(`Household with Electricity %`)
+fig3<-ggplot(Electricity_county, aes(x = reorder(County, -`Household with Electricity %`), y = `Household with Electricity %`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill= '#15616D') +
+  geom_text(aes(label = `Household with Electricity %`), vjust = -0.5,hjust =0.5, size = 3)+
+  labs(title = "Households accessing Electricity %",
+       x = "County",
+       y = "Electricity coverage%") +
+  theme_minimal()+
+  coord_flip()+
+   theme(panel.grid = element_blank())
+```
+
+
+```{r fig.width=12,fig.height=8}
+Electricity_county<-kenya1 %>% 
+  filter(Status=="Urban") %>% 
+  select("County","Status","Household with Electricity %") %>% 
+  arrange(`Household with Electricity %`)
+fig4<-ggplot(Electricity_county, aes(x = reorder(County, -`Household with Electricity %`), y = `Household with Electricity %`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE,fill= '#BC5308') +
+  geom_text(aes(label = `Household with Electricity %`), vjust = -0.5,hjust =0.5, size = 5)+
+  labs(title = "Households accessing Electricity %",
+       x = "County",
+       y = "Electricity coverage%") +
+  theme_minimal()+
+  coord_flip()+
+   theme(panel.grid = element_blank())
+```
+
+
+```{r fig.width=12,fig.height=8}
+grid.arrange(fig3,fig4,ncol=1)
+```
+
+```{r fig.width=12,fig.height=8}
+Rural_index_county<-kenya1 %>%
+  filter(Status=="Rural") %>% 
+  select("County","Status","Rural Access Index%") 
+
+fig5<- ggplot(Rural_index_county, aes(x = reorder(County,-`Rural Access Index%`), y = `Rural Access Index%`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE,fill ='#15616D') +
+  geom_text(aes(label = `Rural Access Index%`), vjust = -0.5,hjust =0.5, size = 5)+
+  labs(title = "Rural access Index (RAI) %",
+       x = "County",
+       y = "percentage (%)") +
+  theme_minimal()+
+  scale_fill_manual(values = colors)+
+  coord_flip()+
+  theme(panel.grid = element_blank())
+```
+
+
+```{r fig.width=12,fig.height=8}
+Rural_index_county<-kenya1 %>%
+  filter(Status=="Urban") %>% 
+  select("County","Status","Rural Access Index%") 
+
+fig6<- ggplot(Rural_index_county, aes(x = reorder(County,-`Rural Access Index%`), y = `Rural Access Index%`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill = '#BC5308') +
+  geom_text(aes(label = `Rural Access Index%`), vjust = -0.5,hjust =0.5, size = 5)+
+  labs(title = "Rural access Index (RAI) %",
+       x = "County",
+       y = "percentage (%)") +
+  theme_minimal()+
+  scale_fill_manual(values = colors)+
+  coord_flip()+
+  theme(panel.grid = element_blank())
+```
+
+
+```{r fig.width=12,fig.height=8}
+grid.arrange(fig5,fig6,ncol=1)
+```
+
+
+```{r fig.width=12,fig.height=8}
+Internet_county<-kenya1 %>% 
+  filter(Status =="Rural") %>% 
+  select("County","Status","population accessing internet%") 
+
+fig7<- ggplot(Internet_county, aes(x = reorder(County,-`population accessing internet%`), y = `population accessing internet%`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill = '#15616D') +
+  geom_text(aes(label = `population accessing internet%`), vjust = -0.5,hjust =0.5, size = 3)+
+  labs(title = "Population accessing Internet%",
+       x = "County",
+       y = "percentage (%)") +
+  theme_minimal()+
+  scale_fill_manual(values = colors)+
+  coord_flip()+
+  theme(panel.grid = element_blank())
+```
+
+
+```{r fig.width=12,fig.height=8}
+Internet_county<-kenya1 %>% 
+  filter(Status =="Urban") %>% 
+  select("County","Status","population accessing internet%") 
+
+fig8<-ggplot(Internet_county, aes(x = reorder(County,-`population accessing internet%`), y = `population accessing internet%`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE,fill = '#BC5308') +
+  geom_text(aes(label = `population accessing internet%`), vjust = -0.5,hjust =0.5, size = 6)+
+  labs(title = "Population accessing Internet%",
+       x = "County",
+       y = "percentage (%)") +
+  theme_minimal()+
+  scale_fill_manual(values = colors)+
+  coord_flip()+
+  theme(panel.grid = element_blank())
+```
+
+
+```{r fig.width=12,fig.height=8}
+grid.arrange(fig7,fig8,ncol=1)
+```
+
+
+```{r fig.width=12,fig.height=8}
+mobile_phones<-kenya1 %>%
+  filter(Status == "Rural") %>% 
+  select("County","Status","population owning mobile phones%") 
+
+fig9<- ggplot(mobile_phones, aes(x = reorder(County, -`population owning mobile phones%`), y = `population owning mobile phones%`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill ='#15616D') +
+  geom_text(aes(label = `population owning mobile phones%`), vjust = -0.5,hjust =0.5, size = 3)+
+  labs(title = "Population owning mobile phones%",
+       x = "County",
+       y = "percentage (%)") +
+  theme_minimal()+
+  scale_fill_manual(values = colors)+
+  coord_flip()+theme(panel.grid = element_blank())
+```
+
+
+```{r fig.width=12,fig.height=8}
+mobile_phones<-kenya1 %>%
+  filter(Status == "Urban") %>% 
+  select("County","Status","population owning mobile phones%") 
+
+fig10<- ggplot(mobile_phones, aes(x = reorder(County, -`population owning mobile phones%`), y = `population owning mobile phones%`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill = '#BC5308') +
+  geom_text(aes(label = `population owning mobile phones%`), vjust = -0.5,hjust =0.5, size = 5)+
+  labs(title = "Population owning mobile phones%",
+       x = "County",
+       y = "percentage (%)") +
+  theme_minimal()+
+  scale_fill_manual(values = colors)+
+  coord_flip()+theme(panel.grid = element_blank())
+
+```
+
+```{r}
+library(gridExtra)
+grid.arrange(fig9,fig10,ncol=1)
+
+```
+
+
