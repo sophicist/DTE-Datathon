@@ -1,0 +1,314 @@
+---
+title: "Health Analysis"
+author: "Lynn Ajema"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo =F, warning =  F, message = F)
+```
+
+```{r,comment=NA}
+library(tidyverse)
+library(ggplot2)
+library(readxl)
+library(reshape2)
+library(janitor)
+```
+
+```{r,comment=NA}
+library(readxl)
+
+colors <- c('#BC5308', '#FFECD1', '#C5CAB8','#FF7D00', '#8AA79F', '#FFB569', '#15616D', '#001524')
+setwd("D:/DTE-Datathon/LYNN ANALYSIS")
+dir()
+sheet_name <- "data"
+kenya <- read_excel("D:/DTE-Datathon/LYNN ANALYSIS/Dataset.xlsx",sheet = sheet_name)
+kenya
+```
+
+```{r}
+library(leaflet)
+library(sf)
+
+# Load the shapefile
+kenya_counties <- st_read("D:/DTE-Datathon/LYNN ANALYSIS/County.shp")
+# Merge data by county
+merged_data <- merge(kenya_counties, kenya, by.x = "COUNTY", by.y = "COUNTY")
+
+
+```
+```{r}
+# Create a leaflet map
+install.packages("leaflet")
+remotes::install_github("rstudio/webshot2")
+library(webshot2)
+kenya_map <- leaflet(merged_data) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addPolygons(
+    fillColor = ~colorQuantile("YlOrRd", merged_data$`Total Population`)(merged_data$`Total Population`),
+    fillOpacity = 0.7,
+    color = "white",
+    weight = 1,
+    label = ~paste(merged_data$COUNTY, "<br>", "Total Population:", merged_data$`Total Population`, "people"),
+    highlight = highlightOptions(
+      weight = 3,
+      color = "#666",
+      fillOpacity = 0.7,
+      bringToFront = TRUE
+    ),
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px"
+    )
+  ) %>%
+  addLegend(
+    "bottomright",
+    pal = colorQuantile("YlOrRd", merged_data$`Total Population`),
+    values = ~merged_data$`Total Population`,
+    title = "Total population",
+    opacity = 0.7
+  )
+
+# Display the map
+htmlwidgets::saveWidget(kenya_map, "kenya_map.html")
+
+# Take a screenshot and save it as an image
+webshot2::webshot("kenya_map.html", "kenya_map.png")
+```
+
+#Health Analysis
+## How many countys have level 5/6 hospitals
+```{r}
+library(knitr)
+# Filter and summarize the data to count level 5/6 hospitals by county
+level_5_6_hospitals <- kenya %>%
+  filter(Health_LV5/6 > 0)%>%
+  select(COUNTY, Health_LV5/6)
+  #group_by(COUNTY) %>%
+  #summarise(Count_Level_5_6_Hospitals = sum(Health_LV5/6))
+
+# Create a table using kable
+kable(level_5_6_hospitals, caption = "Count of Level 5/6 Hospitals by County")
+```
+
+
+## Bar chart showing Level 4 hospital distribution among Rural counties
+```{r,fig.height=12,fig.width=10}
+# Load the required libraries
+library(ggplot2)
+
+# Filter the data to include only rural counties
+kenya_rural <- kenya %>%
+  filter(Status == "Rural") %>%
+  arrange(Health_LV4)
+
+# Create the bar chart
+fig1<- ggplot(kenya_rural, aes(x = reorder(COUNTY, -Health_LV4), y = Health_LV4, fill = "#BC5308")) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  theme_minimal() +
+  labs(x = "County", y = "Number of Level 4 Hospitals") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_discrete(name = "County") +
+  ggtitle("Distribution of Level 4 Hospitals by Rural Counties") +
+  coord_flip()+
+  scale_fill_manual(values = colors)
+fig1
+```
+##Bar chart showing Level 4 hospital distribution in Urban counties
+```{r,fig.height=12,fig.width=10}
+# Filter the data to include only rural counties
+kenya_rural <- kenya %>%
+  filter(Status == "Urban") %>%
+  arrange(Health_LV4)
+
+# Create the bar chart
+fig2<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -Health_LV4), y = Health_LV4)) +
+  geom_bar(stat = "identity", show.legend = FALSE,fill=colors[7]) +
+  theme_minimal() +
+  labs(x = "County", y = "Number of Level 4 Hospitals") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_discrete(name = "County") +
+  ggtitle("Distribution of Level 4 Hospitals by Urban Counties") +
+  coord_flip()+
+  scale_fill_manual(values = colors)
+fig2
+```
+##Bar chart showing Level 3 hospitals distribution by Rural counties
+```{r,fig.height=12,fig.width=10}
+# Filter the data to include only rural counties
+kenya_rural <- kenya %>%
+  filter(Status == "Rural") %>%
+  arrange(Health_LV3)
+
+# Create the bar chart
+fig3<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -Health_LV3), y = Health_LV3, fill = "#BC5308")) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  theme_minimal() +
+  labs(x = "County", y = "Number of Level 3 Hospitals") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_discrete(name = "County") +
+  ggtitle("Distribution of Level 3 Hospitals by Rural Counties") +
+  coord_flip()+
+  scale_fill_manual(values = colors)
+fig3
+```
+##Bar chart showing ditribution of level 3 Hospitals in Urban counties
+```{r,fig.height=12,fig.width=10}
+# Filter the data to include only rural counties
+kenya_rural <- kenya %>%
+  filter(Status == "Urban") %>%
+  arrange(Health_LV3)
+
+# Create the bar chart
+fig4<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -Health_LV3), y = Health_LV3)) +
+  geom_bar(stat = "identity", show.legend = FALSE,fill=colors[7]) +
+  theme_minimal() +
+  labs(x = "County", y = "Number of Level 3 Hospitals") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_discrete(name = "County") +
+  ggtitle("Distribution of Level 3 Hospitals by Urban Counties") +
+  coord_flip()+
+  scale_fill_manual(values = colors)
+fig4
+```
+
+##Bar chart showing Level 2 Hospitals distribution by Rural county
+```{r,fig.height=12,fig.width=10}
+kenya_rural<-kenya%>%
+  filter(Status=="Rural")%>%
+  arrange(Health_LV2)
+
+#create bar chart
+fig5<-ggplot(kenya, aes(x = reorder(COUNTY, -Health_LV2), y = Health_LV2, fill = "#15616D")) +
+  geom_bar(stat = "identity",show.legend = FALSE) +
+  theme_minimal() +
+  labs(x = "County", y = "Number of Level 2 Hospitals") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_discrete(name = "County") +
+  ggtitle("Distribution of Level 2 Hospitals by Rural Counties")+
+  coord_flip()+
+  scale_fill_manual(values = colors)
+fig5
+```
+##Bar chart showing Level 2 hospital distribution by Urban counties
+```{r,fig.height=12,fig.width=10}
+kenya_rural<-kenya%>%
+  filter(Status=="Urban")%>%
+  arrange(Health_LV2)
+
+#create bar chart
+fig6<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -Health_LV2), y = Health_LV2)) +
+  geom_bar(stat = "identity",show.legend = FALSE,fill=colors[7]) +
+  theme_minimal() +
+  labs(x = "County", y = "Number of Level 2 Hospitals") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_discrete(name = "County") +
+  ggtitle("Distribution of Level 2 Hospitals by Urban Counties")+
+  coord_flip()+
+  scale_fill_manual(values = colors)
+fig6
+```
+ 
+##Bar chart showing hospital bed density per 10000 population by Rural Counties
+```{r,fig.height=12,fig.width=10}
+kenya_rural<-kenya%>%
+  filter(Status=="Rural")%>%
+  arrange(`Bed density per 10000 ppn`)
+
+#create bar chart
+fig7<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -`Bed density per 10000 ppn`), y = `Bed density per 10000 ppn`,
+                              fill="#15616D")) +
+  geom_bar(stat = "identity",show.legend = FALSE) +
+  theme_minimal() +
+  labs(x = "County", y = "Bed density per 10000 ppn") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_discrete(name = "County") +
+  ggtitle("Distribution of Bed density per 10000 ppn by Rural Counties")+
+  coord_flip()+
+  scale_fill_manual(values = colors)
+fig7
+```
+
+##Bar chart showing hospital bed density per 10000 population by Urban counties
+```{r,fig.height=12,fig.width=10}
+kenya_rural<-kenya%>%
+  filter(Status=="Urban")%>%
+  arrange(`Bed density per 10000 ppn`)
+
+#create bar chart
+fig8<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -`Bed density per 10000 ppn`), y = `Bed density per 10000 ppn`)) +
+  geom_bar(stat = "identity",show.legend = FALSE,fill=colors[7]) +
+  theme_minimal() +
+  labs(x = "County", y = "Bed density per 10000 ppn") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_discrete(name = "County") +
+  ggtitle("Distribution of Bed density per 10000 ppn by Urban Counties")+
+  coord_flip()+
+  scale_fill_manual(values = colors)
+fig8
+```
+
+##Bar chart showing Health worker per 10000 ppn by Rural county
+```{r,fig.height=12,fig.width=10}
+kenya_rural<-kenya%>%
+  filter(Status=="Rural")%>%
+  arrange(`Health worker per 10000 ppn`)
+
+#create bar chart
+fig9<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -`Health worker per 10000 ppn`), y = `Health worker per 10000 ppn`,
+                              fill="#15616D")) +
+  geom_bar(stat = "identity",show.legend = FALSE) +
+  theme_minimal() +
+  labs(x = "County", y = "Health worker per 10000 ppn") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_discrete(name = "County") +
+  ggtitle("Distribution of Health worker per 10000 ppn by Urban Counties")+
+  coord_flip()+
+  scale_fill_manual(values = colors)
+```
+##Bar chart showing Health worker per 10000 ppn by Urban county
+```{r,fig.height=12,fig.width=10}
+kenya_rural<-kenya%>%
+  filter(Status=="Urban")%>%
+  arrange(`Health worker per 10000 ppn`)
+
+#create bar chart
+fig10<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -`Health worker per 10000 ppn`), y = `Health worker per 10000 ppn`)) +
+  geom_bar(stat = "identity",show.legend = FALSE,fill=colors[7]) +
+  theme_minimal() +
+  labs(x = "County", y = "Health worker per 10000 ppn") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_discrete(name = "County") +
+  ggtitle("Distribution of Health worker per 10000 ppn by Urban Counties")+
+  coord_flip()+
+  scale_fill_manual(values = colors)
+```
+
+## Bar charts showing Level 4 Hospital Distribution by counties
+```{r,fig.height=10,fig.width=8}
+library(gridExtra)
+grid.arrange(fig1,fig2,ncol=1)
+```
+## Bar charts showing Level 3 Hospital Distribution by counties
+```{r,fig.height=10,fig.width=8}
+grid.arrange(fig3,fig4,ncol=1)
+```
+## Bar charts showing Level 2 Hospital Distribution by counties
+```{r,fig.height=10,fig.width=8}
+grid.arrange(fig5,fig6,ncol=1)
+```
+## Bar charts showing Hospital Bed density per 10000 population by counties
+```{r,fig.height=10,fig.width=8}
+grid.arrange(fig7,fig8,ncol=1)
+```
+## Barcharts showing Hospital worker per 10000 population Distribution by counties
+```{r,fig.height=10,fig.width=8}
+grid.arrange(fig9,fig10,ncol=1)
+```
+
