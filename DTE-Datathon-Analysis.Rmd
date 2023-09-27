@@ -23,7 +23,7 @@ knitr::opts_chunk$set(echo = TRUE,warning =F,message = F,comment = NA)
 
 This analysis is intended for the DTE datathon, which aims to cultivate a data-driven, innovative, and collaborative environment for creatively addressing societal issues and producing actionable solutions.
 
-```{r}
+```{r, comment=NA}
 
 library(tidyverse)
 library(gridExtra)
@@ -55,7 +55,7 @@ innovative solutions.
 
 
 
-```{r}
+```{r, comment=NA}
 
 colors <- c('#BC5308', '#FFECD1', '#C5CAB8', '#FF7D00', '#8AA79F', '#FFB569', '#15616D', '#001524')
 
@@ -96,9 +96,15 @@ The data collection process was primarily manual, and it followed the following 
 
 ## Rural-Urban health dynamics
 
+<<<<<<< HEAD
 ### Population distribution 
 
 ```{r}
+=======
+# Population distribution 
+
+```{r, comment=NA}
+>>>>>>> 490b9a6f9f89b705a1eb8efc333af9d3fabab3d8
 data<-read_excel("Dataset.xlsx",sheet="population distribution")
 
 data$Cohorts<-as.factor(data$Cohorts)
@@ -110,10 +116,20 @@ data$Cohorts <- factor(data$Cohorts, levels = c("0-5", "6-14", "15-35", "36-60",
 library(ggplot2)
 
 # Create a histogram of age cohort distribution
+<<<<<<< HEAD
 ggplot(data, aes(x = Cohorts, y = Total)) +
   geom_bar(stat = "identity", fill = '#15616D') +
   # geom_text(aes(label = Total)) +
   labs(x = "Age group ", y = "Population", title = "Age  Distribution for the Entire Country") +
+=======
+data %>% 
+  group_by(Cohorts) %>% 
+  summarise(Totals=sum(Total)) %>% 
+ggplot( aes(x = Cohorts, y = Totals)) +
+  geom_bar(stat = "identity", fill = '#15616D') +
+  geom_text(aes(label = Totals), vjust = -0.5, size = 3) +  # Add text labels above the bars
+  labs(x = "Age group", y = "Total population", title = "Age Distribution for the Entire Country") +
+>>>>>>> 490b9a6f9f89b705a1eb8efc333af9d3fabab3d8
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -124,7 +140,11 @@ Persons aged 15 to 35 years are majority indicating the high labour force and th
 
 ## The distribution of age groups in each county
 
+<<<<<<< HEAD
 ```{r, fig.height=6,fig.width=8}
+=======
+```{r, fig.height=6,fig.width=8, comment=NA}
+>>>>>>> 490b9a6f9f89b705a1eb8efc333af9d3fabab3d8
 cohort_summary <- data %>%
   group_by(County,Cohorts) %>%
   summarise(Total_Population = round((sum(Total)/100000),3))
@@ -147,12 +167,19 @@ ggplot(cohort_summary, aes(x = reorder(County, -Total_Population), y = Total_Pop
 ## Population distribution for each county by each gender
 
 
+<<<<<<< HEAD
 ```{r, fig.height=10,fig.width=12}
 
 
 
 data_long <- data %>%
   pivot_longer(cols = -c("County", "Cohorts", "Total", "male", "female"), names_to = "gender", values_to = "population")
+=======
+```{r, fig.height=10,fig.width=12, comment=NA}
+
+data_long <- data %>%
+  pivot_longer(cols = -c("County", "Cohorts", "Total"), names_to = "gender", values_to = "population")
+>>>>>>> 490b9a6f9f89b705a1eb8efc333af9d3fabab3d8
 
 # Calculate Total population per County
 total_population <- data_long %>%
@@ -177,13 +204,21 @@ data_long %>%
 
 ```
 
+<<<<<<< HEAD
 Nairobi county has the highest population by both gender levels and Lamu county has the lowest population with more males than females.
+=======
+ Nairobi county has the highest population by both gender levels and Lamu county has the lowest population with more males than females.
+>>>>>>> 490b9a6f9f89b705a1eb8efc333af9d3fabab3d8
 
 
 ### Gender distribution across the age groups in the population.
 
 
+<<<<<<< HEAD
 ```{r, fig.height=6,fig.width=8}
+=======
+```{r, fig.height=6,fig.width=8, comment=NA}
+>>>>>>> 490b9a6f9f89b705a1eb8efc333af9d3fabab3d8
 # Assuming you have already loaded and transformed your data into 'data_long' as described in your code
 
 data_long %>%
@@ -204,10 +239,72 @@ data_long %>%
   
   
   Female gender in the population were more in age groups 15to 35 years and above 60 years while contrast to male gender in the other age groups.
+<<<<<<< HEAD
   
   
 ```{r}
 
+=======
+ 
+
+## Population mean distribution in Rural and Urban in Kenya 
+ 
+```{r, comment=NA}
+stats=df %>% summarise(`Rural mean population`=mean(Rural_ppn),
+                 `Rural SD`=sd(Rural_ppn),
+                 `Rural IQR`=IQR(Rural_ppn),
+                 `Urban mean population`=mean(Urban_ppn),
+                 `Urban SD`=sd(Urban_ppn),
+                 `Urban IQR`=IQR(Urban_ppn))
+stats %>% kable()
+
+
+
+```
+ 
+ On average the  rural distribution is (Mean=696932.3 persons ,SD=367022) and urban population is (Mean=315073.8,SD=	689484.4)
+ 
+ 
+### Rural and urban population comparison for each county
+
+```{r, fig.height=10,fig.width=12, comment=NA}
+DataRural <- df %>%
+  select(County, Rural_ppn, Urban_ppn) %>%
+  pivot_longer(cols = c(Rural_ppn, Urban_ppn), names_to = "Residence", values_to = "Populations")
+
+DataRural$Residence <- ifelse(DataRural$Residence == "Rural_ppn", "Rural", "Urban")
+DataRural$Populations <- as.numeric(DataRural$Populations)
+
+# Calculate Total population per County
+total_population <- DataRural %>%
+  group_by(County) %>%
+  summarise(Total_Population = sum(Populations))
+
+# Reorder the levels of County based on Total population (descending order)
+DataRural$County <- factor(DataRural$County, levels = total_population$County[order(total_population$Total_Population)])
+
+DataRural %>%
+  group_by(County, Residence) %>%
+  summarise(Totals = round((sum(Populations) / 100000), 2)) %>%
+  ggplot(aes(x = County, y = Totals, fill = Residence)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = Totals), position = position_stack(vjust = 0.5), size = 3) +
+  labs(y = "Population '00000'", x = "County", title = "Population of Residence Distribution by County in '00000'") +
+  scale_fill_manual(values = c("Rural" = '#FFECD1', "Urban" = '#15616D')) +
+  theme_minimal() +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 0.5))
+
+```
+ 
+ 
+ Mombasa and Nairobi had the residence being urban and Nakuru county accounted half of the population as urban and rural residence. While West pokot county accounted majority of its residence as rural.
+
+
+```{r, comment=NA}
+library(leaflet)
+library(sf)
+>>>>>>> 490b9a6f9f89b705a1eb8efc333af9d3fabab3d8
 
 # Load the shapefile
 kenya_counties <- st_read("LYNN ANALYSIS/County.shp")
@@ -216,7 +313,7 @@ merged_data <- merge(kenya_counties, kenya, by.x = "COUNTY", by.y = "COUNTY")
 
 
 ```
-```{r}
+```{r, comment=NA}
 # Create a leaflet map
 #install.packages("leaflet")
 #remotes::install_github("rstudio/webshot2")
@@ -259,7 +356,7 @@ webshot2::webshot("kenya_map.html", "kenya_map.png")
 #Health Analysis
 
 
-```{r}
+```{r, comment=NA}
 
 # Filter and summarize the data to count level 5/6 hospitals by county
 level_5_6_hospitals <- kenya %>%
@@ -273,7 +370,7 @@ level_5_6_hospitals <- kenya %>%
 ```
 
 
-```{r,fig.height=12,fig.width=10}
+```{r,fig.height=12,fig.width=10, comment=NA}
 # Load the required libraries
 
 
@@ -283,19 +380,19 @@ kenya_rural <- kenya %>%
   arrange(Health_LV4)
 
 # Create the bar chart
-fig1<- ggplot(kenya_rural, aes(x = reorder(COUNTY, -Health_LV4), y = Health_LV4, fill = "#BC5308")) +
+fig1 <- ggplot(kenya_rural, aes(x = reorder(COUNTY, -Health_LV4), y = Health_LV4, fill = "#BC5308")) +
   geom_bar(stat = "identity", show.legend = FALSE) +
   theme_minimal() +
   labs(x = "County", y = "Number of Level 4 Hospitals") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_fill_discrete(name = "County") +
   ggtitle("Distribution of Level 4 Hospitals by Rural Counties") +
-  coord_flip()+
-  scale_fill_manual(values = colors)
+  coord_flip() +
+  geom_text(aes(label = Health_LV4), vjust = 0.5, hjust = 1, size = 4, color = colors[7])+
+  theme_hc()
 
 ```
 
-```{r,fig.height=12,fig.width=10}
+```{r,fig.height=12,fig.width=10, comment=NA}
 # Filter the data to include only rural counties
 kenya_rural <- kenya %>%
   filter(Status == "Urban") %>%
@@ -303,37 +400,37 @@ kenya_rural <- kenya %>%
 
 # Create the bar chart
 fig2<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -Health_LV4), y = Health_LV4)) +
-  geom_bar(stat = "identity", show.legend = FALSE,fill=colors[7]) +
+  geom_bar(stat = "identity", show.legend = FALSE,fill=colors[1]) +
   theme_minimal() +
   labs(x = "County", y = "Number of Level 4 Hospitals") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_fill_discrete(name = "County") +
   ggtitle("Distribution of Level 4 Hospitals by Urban Counties") +
   coord_flip()+
-  scale_fill_manual(values = colors)
+  geom_text(aes(label = Health_LV4), vjust = 0.5, hjust = 1, size = 8, color = colors[7])+
+  theme_hc()
 
 ```
 
-```{r,fig.height=12,fig.width=10}
+```{r,fig.height=12,fig.width=10, comment=NA}
 # Filter the data to include only rural counties
 kenya_rural <- kenya %>%
   filter(Status == "Rural") %>%
   arrange(Health_LV3)
 
 # Create the bar chart
-fig3<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -Health_LV3), y = Health_LV3, fill = "#BC5308")) +
+fig3<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -Health_LV3), y = Health_LV3, fill = colors[1])) +
   geom_bar(stat = "identity", show.legend = FALSE) +
   theme_minimal() +
   labs(x = "County", y = "Number of Level 3 Hospitals") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_fill_discrete(name = "County") +
   ggtitle("Distribution of Level 3 Hospitals by Rural Counties") +
   coord_flip()+
-  scale_fill_manual(values = colors)
+  geom_text(aes(label = Health_LV3), vjust = 0.5, hjust = -0.1, size = 4, color = colors[7])+
+  theme_hc()
 
 ```
 
-```{r,fig.height=12,fig.width=10}
+```{r,fig.height=12,fig.width=10, comment=NA}
 # Filter the data to include only rural counties
 kenya_rural <- kenya %>%
   filter(Status == "Urban") %>%
@@ -348,18 +445,18 @@ fig4<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -Health_LV3), y = Health_LV3))
   scale_fill_discrete(name = "County") +
   ggtitle("Distribution of Level 3 Hospitals by Urban Counties") +
   coord_flip()+
-  scale_fill_manual(values = colors)
-
+  geom_text(aes(label = Health_LV3), vjust = 0.5, hjust = 1, size = 6, color = colors[1])+
+  theme_hc()
 ```
 
 
-```{r,fig.height=12,fig.width=10}
+```{r,fig.height=12,fig.width=10, comment=NA}
 kenya_rural<-kenya%>%
   filter(Status=="Rural")%>%
   arrange(Health_LV2)
 
 #create bar chart
-fig5<-ggplot(kenya, aes(x = reorder(COUNTY, -Health_LV2), y = Health_LV2, fill = "#15616D")) +
+fig5<-ggplot(kenya, aes(x = reorder(COUNTY, -Health_LV2), y = Health_LV2, fill = colors[1])) +
   geom_bar(stat = "identity",show.legend = FALSE) +
   theme_minimal() +
   labs(x = "County", y = "Number of Level 2 Hospitals") +
@@ -367,29 +464,32 @@ fig5<-ggplot(kenya, aes(x = reorder(COUNTY, -Health_LV2), y = Health_LV2, fill =
   scale_fill_discrete(name = "County") +
   ggtitle("Distribution of Level 2 Hospitals by Rural Counties")+
   coord_flip()+
-  scale_fill_manual(values = colors)
+  geom_text(aes(label = Health_LV2), vjust = 0.5, hjust = 1, size = 3, color = colors[7])+
+  theme_hc()
+  
 
 ```
 
-```{r,fig.height=12,fig.width=10}
+```{r,fig.height=12,fig.width=10, comment=NA}
 kenya_rural<-kenya%>%
   filter(Status=="Urban")%>%
   arrange(Health_LV2)
 
 #create bar chart
 fig6<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -Health_LV2), y = Health_LV2)) +
-  geom_bar(stat = "identity",show.legend = FALSE,fill=colors[7]) +
+  geom_bar(stat = "identity",show.legend = FALSE,fill=colors[1]) +
   theme_minimal() +
   labs(x = "County", y = "Number of Level 2 Hospitals") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_fill_discrete(name = "County") +
   ggtitle("Distribution of Level 2 Hospitals by Urban Counties")+
   coord_flip()+
-  scale_fill_manual(values = colors)
+  geom_text(aes(label = Health_LV2), vjust = 0.5, hjust = 1, size = 6, color = colors[7])+
+  theme_hc()
 
 ```
 
-```{r,fig.height=12,fig.width=10}
+```{r,fig.height=12,fig.width=10, comment=NA}
 kenya_rural<-kenya%>%
   filter(Status=="Rural")%>%
   arrange(`Bed density per 10000 ppn`)
@@ -404,11 +504,12 @@ fig7<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -`Bed density per 10000 ppn`),
   scale_fill_discrete(name = "County") +
   ggtitle("Distribution of Bed density per 10000 ppn by Rural Counties")+
   coord_flip()+
-  scale_fill_manual(values = colors)
+  geom_text(aes(label = `Bed density per 10000 ppn`), vjust = 0.5, hjust = 1, size = 6, color = colors[1])+
+  theme_hc()
 
 ```
 
-```{r,fig.height=12,fig.width=10}
+```{r,fig.height=12,fig.width=10, comment=NA}
 kenya_rural<-kenya%>%
   filter(Status=="Urban")%>%
   arrange(`Bed density per 10000 ppn`)
@@ -426,7 +527,7 @@ fig8<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -`Bed density per 10000 ppn`),
 
 ```
 
-```{r,fig.height=12,fig.width=10}
+```{r,fig.height=12,fig.width=10, comment=NA}
 kenya_rural<-kenya%>%
   filter(Status=="Rural")%>%
   arrange(`Health worker per 10000 ppn`)
@@ -444,7 +545,7 @@ fig9<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -`Health worker per 10000 ppn`
   scale_fill_manual(values = colors)
 ```
 
-```{r,fig.height=12,fig.width=10}
+```{r,fig.height=12,fig.width=10, comment=NA}
 kenya_rural<-kenya%>%
   filter(Status=="Urban")%>%
   arrange(`Health worker per 10000 ppn`)
@@ -463,39 +564,39 @@ fig10<-ggplot(kenya_rural, aes(x = reorder(COUNTY, -`Health worker per 10000 ppn
 
 ## Bar charts showing Level 4 Hospital Distribution by counties
 
-```{r,fig.height=10,fig.width=8}
+```{r,fig.height=10,fig.width=8, comment=NA}
 library(gridExtra)
 grid.arrange(fig1,fig2,ncol=1)
 ```
 
 ## Bar charts showing Level 3 Hospital Distribution by counties
 
-```{r,fig.height=10,fig.width=8}
+```{r,fig.height=10,fig.width=8, comment=NA}
 grid.arrange(fig3,fig4,ncol=1)
 ```
 
 ## Bar charts showing Level 2 Hospital Distribution by counties
 
-```{r,fig.height=10,fig.width=8}
+```{r,fig.height=10,fig.width=8, comment=NA}
 grid.arrange(fig5,fig6,ncol=1)
 ```
 
 ## Bar charts showing Hospital Bed density per 10000 population by counties
 
-```{r,fig.height=10,fig.width=8}
+```{r,fig.height=10,fig.width=8, comment=NA}
 grid.arrange(fig7,fig8,ncol=1)
 ```
 
 ## Barcharts showing Hospital worker per 10000 population Distribution by counties
 
-```{r,fig.height=10,fig.width=8}
+```{r,fig.height=10,fig.width=8, comment=NA}
 grid.arrange(fig9,fig10,ncol=1)
 ```
 
 # Rural-Urban Education dynamics
 ## Primary school education
 
-```{r,fig.width = 12,fig.height =12}
+```{r,fig.width = 12,fig.height =12, comment=NA}
 # find an arrangement index
 y <- df %>%  select(County,`Ppn with primary(%)`,Status) %>% arrange(`Ppn with primary(%)`)
 y$County <- factor(y$County,levels = y$County)
@@ -525,7 +626,7 @@ grid.arrange(rural,urban,ncol =2)
 
 ## Secondary school education
 
-```{r,fig.width = 12,fig.height =12}
+```{r,fig.width = 12,fig.height =12, comment=NA}
 # find an arrangement index
 y <- df %>%  select(County,`Ppn with secondary%`,Status) %>% arrange(`Ppn with secondary%`)
 y$County <- factor(y$County,levels = y$County)
@@ -555,7 +656,7 @@ grid.arrange(rural,urban,ncol =2)
 
 ```
 
-```{r}
+```{r, comment=NA}
 df %>% select(Status,`No Primary`,`Number secondary`) %>% 
   melt(id.vars = 'Status') %>% 
   ggplot(aes(x = variable,y =value,fill = Status))+geom_boxplot(width = 0.3, size = 0.7)+
@@ -572,180 +673,208 @@ df %>% select(Status,`No Primary`,`Number secondary`) %>%
 
 ## Rural-Urban Misc
 
+## Water and Sanitation
 
-```{r fig.width=12,fig.height=8}
+```{r fig.width=12,fig.height=10, comment=NA}
 water_county <-kenya1 %>% 
   filter(Status== "Rural") %>% 
   select("County","Status","Households with water %")
 
-fig1<- ggplot(water_county, aes(x = reorder(County, -`Households with water %`), y = `Households with water %`, fill = Status))+
-  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill = '#15616D') +
-  geom_text(aes(label = `Households with water %`), vjust = -0.5,hjust =0.5, size = 3)+
-  labs(title = "Percentage of Households with Water by County",
+FIG1<- ggplot(water_county, aes(x = reorder(County, -`Households with water %`), y = `Households with water %`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill = colors[7]) +
+  geom_text(aes(label = `Households with water %`),color = colors[1], vjust = 0.5,hjust =1, size = 5)+
+  labs(title = "Percentage of Households accessing safe drinking water",
        x = "County",
-       y = "Percentage of Households with Water") +
+       y = "Percentage (%)") +
   theme_minimal()+
   coord_flip()+
-   theme(panel.grid = element_blank())
+   theme(panel.grid = element_blank())+
+  theme_hc()
 ```
 
 
-```{r fig.width=12,fig.height=8}
+```{r fig.width=12,fig.height=8, comment=NA}
 water_county <-kenya1 %>% 
   filter(Status== "Urban") %>% 
   select("County","Status","Households with water %")
 
-fig2<- ggplot(water_county, aes(x = reorder(County, -`Households with water %`), y = `Households with water %`, fill = Status))+
-  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE,fill = '#BC5308') +
-  geom_text(aes(label = `Households with water %`), vjust = -0.5,hjust =0.5, size = 3)+
-  labs(title = "Percentage of Households with Water by County",
+FIG2<- ggplot(water_county, aes(x = reorder(County, -`Households with water %`), y = `Households with water %`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE,fill = colors[1]) +
+  geom_text(aes(label = `Households with water %`), vjust = 0.5,hjust =1, size = 6,color= colors[7])+
+  labs(title = "Percentage of Households accessing safe drinking water",
        x = "County",
-       y = "Percentage of Households with Water") +
+       y = "Percentage (%)") +
   theme_minimal()+
   coord_flip()+
-  theme(panel.grid = element_blank())
+  theme(panel.grid = element_blank())+theme_hc()
 ```
 
+## Bargraphs showing the distribution of safe drinking water in the counties in terms of percentages.
 
-```{r fig.width=12,fig.height=8}
+```{r fig.width=11,fig.height=10, comment=NA}
 
-grid.arrange(fig1,fig2,ncol=1)
+grid.arrange(FIG1,FIG2,ncol=2)
 ```
-
-```{r}
+Water plays a crucial role in the natural development of human beings. The following two graphs depict the accessibility of water in various counties. Among the rural counties, Bungoma leads with an impressive accessibility rate of 80.5%. Conversely, among the urban counties, Kiambu boasts a remarkable 86% accessibility rate, surpassing Nairobi, the capital city of Kenya. These findings underscore the significance of water accessibility in both rural and urban settings.
+```{r, comment=NA}
 # water_county
 ```
 
-
-```{r fig.width=12,fig.height=8}
+## Energy
+ 
+```{r fig.width=12,fig.height=8, comment=NA}
 Electricity_county<-kenya1 %>% 
   filter(Status=="Rural") %>% 
   select("County","Status","Household with Electricity %") %>% 
   arrange(`Household with Electricity %`)
-fig3<-ggplot(Electricity_county, aes(x = reorder(County, -`Household with Electricity %`), y = `Household with Electricity %`, fill = Status))+
-  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill= '#15616D') +
-  geom_text(aes(label = `Household with Electricity %`), vjust = -0.5,hjust =0.5, size = 3)+
+FIG3<-ggplot(Electricity_county, aes(x = reorder(County, -`Household with Electricity %`), y = `Household with Electricity %`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill= colors[7]) +
+  geom_text(aes(label = `Household with Electricity %`), vjust = 0.5,hjust =1, size = 5,color= colors[1])+
   labs(title = "Households accessing Electricity %",
        x = "County",
        y = "Electricity coverage%") +
   theme_minimal()+
   coord_flip()+
-   theme(panel.grid = element_blank())
+   theme(panel.grid = element_blank())+theme_hc()
 ```
 
 
-```{r fig.width=12,fig.height=8}
+```{r fig.width=12,fig.height=8, comment=NA}
 Electricity_county<-kenya1 %>% 
   filter(Status=="Urban") %>% 
   select("County","Status","Household with Electricity %") %>% 
   arrange(`Household with Electricity %`)
-fig4<-ggplot(Electricity_county, aes(x = reorder(County, -`Household with Electricity %`), y = `Household with Electricity %`, fill = Status))+
-  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE,fill= '#BC5308') +
-  geom_text(aes(label = `Household with Electricity %`), vjust = -0.5,hjust =0.5, size = 5)+
+FIG4<-ggplot(Electricity_county, aes(x = reorder(County, -`Household with Electricity %`), y = `Household with Electricity %`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE,fill= colors[1]) +
+  geom_text(aes(label = `Household with Electricity %`), vjust = 0.5,hjust =1, size = 5,color= colors[7])+
   labs(title = "Households accessing Electricity %",
        x = "County",
        y = "Electricity coverage%") +
   theme_minimal()+
   coord_flip()+
-   theme(panel.grid = element_blank())
+   theme(panel.grid = element_blank())+
+  theme_hc()
 ```
 
 
-```{r fig.width=12,fig.height=8}
-grid.arrange(fig3,fig4,ncol=1)
-```
+## Bargraphs showing the energy distribution in the Counties in percentages 
 
-```{r fig.width=12,fig.height=8}
+```{r fig.width=12,fig.height=8, comment=NA}
+grid.arrange(FIG3,FIG4,ncol=2)
+```
+The level of energy connectivity is a pivotal indicator of societal development. The two aforementioned graphs provide insights into the extent of connectivity across various counties. Within the rural category, Turkana County registers the lowest electricity connection rate at 8.8%, while Nyeri County leads with an impressive 72% of households connected to the grid. Among urban counties, Isiolo County reports a 40.6% access to energy, while the capital city boasts an impressive 96.7% electricity accessibility rate. These findings underscore the importance of energy connectivity as a key driver of development in both rural and urban areas.
+
+
+
+##Rural Access Index (RAI)-%
+
+```{r fig.width=12,fig.height=10, comment=NA}
 Rural_index_county<-kenya1 %>%
   filter(Status=="Rural") %>% 
   select("County","Status","Rural Access Index%") 
 
-fig5<- ggplot(Rural_index_county, aes(x = reorder(County,-`Rural Access Index%`), y = `Rural Access Index%`, fill = Status))+
-  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE,fill ='#15616D') +
-  geom_text(aes(label = `Rural Access Index%`), vjust = -0.5,hjust =0.5, size = 5)+
-  labs(title = "Rural access Index (RAI) %",
+FIG5<- ggplot(Rural_index_county, aes(x = reorder(County,-`Rural Access Index%`), y = `Rural Access Index%`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE,fill =colors[7]) +
+  geom_text(aes(label = `Rural Access Index%`), vjust = 0.5,hjust =1, size = 5,color = colors[1])+
+  labs(title = "Rural access Index (RAI) % ~ Rural Counties",
        x = "County",
        y = "percentage (%)") +
   theme_minimal()+
   scale_fill_manual(values = colors)+
   coord_flip()+
-  theme(panel.grid = element_blank())
+  theme(panel.grid = element_blank())+
+  theme_hc()
 ```
 
 
-```{r fig.width=12,fig.height=8}
+```{r fig.width=12,fig.height=8, comment=NA}
 Rural_index_county<-kenya1 %>%
   filter(Status=="Urban") %>% 
   select("County","Status","Rural Access Index%") 
 
-fig6<- ggplot(Rural_index_county, aes(x = reorder(County,-`Rural Access Index%`), y = `Rural Access Index%`, fill = Status))+
-  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill = '#BC5308') +
-  geom_text(aes(label = `Rural Access Index%`), vjust = -0.5,hjust =0.5, size = 5)+
-  labs(title = "Rural access Index (RAI) %",
+FIG6<- ggplot(Rural_index_county, aes(x = reorder(County,-`Rural Access Index%`), y = `Rural Access Index%`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill = colors[1]) +
+  geom_text(aes(label = `Rural Access Index%`), vjust = 0.5,hjust =1, size = 5,color= colors[7])+
+  labs(title = "Rural access Index (RAI) % ~ Urban Counties ",
        x = "County",
        y = "percentage (%)") +
   theme_minimal()+
   scale_fill_manual(values = colors)+
   coord_flip()+
-  theme(panel.grid = element_blank())
+  theme(panel.grid = element_blank())+
+  theme_hc()
 ```
 
+##Bargraphs showing Rural Access Index (RAI)-%
 
-```{r fig.width=12,fig.height=8}
-grid.arrange(fig5,fig6,ncol=1)
+```{r fig.width=12,fig.height=8, comment=NA}
+grid.arrange(FIG5,FIG6,ncol=2)
 ```
+Robust infrastructure is a cornerstone of thriving communities, facilitating seamless mobility for both goods and people. Quality infrastructure plays a pivotal role in fostering regional development. The two accompanying graphs present the Rural Access Index in terms of percentages. It is particularly noteworthy that Kirinyaga and Murang'a, despite being categorized as rural counties, exhibit superior rural accessibility compared to Nairobi and Mombasa, typically classified as urban counties. This observation underscores the significance of infrastructure in rural areas and challenges conventional urban-rural distinctions.  
 
 
-```{r fig.width=12,fig.height=8}
+
+##Information Communication and Technology (ICT)
+
+```{r fig.width=12,fig.height=8, comment=NA}
 Internet_county<-kenya1 %>% 
   filter(Status =="Rural") %>% 
   select("County","Status","population accessing internet%") 
 
-fig7<- ggplot(Internet_county, aes(x = reorder(County,-`population accessing internet%`), y = `population accessing internet%`, fill = Status))+
-  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill = '#15616D') +
-  geom_text(aes(label = `population accessing internet%`), vjust = -0.5,hjust =0.5, size = 3)+
-  labs(title = "Population accessing Internet%",
+FIG7<- ggplot(Internet_county, aes(x = reorder(County,-`population accessing internet%`), y = `population accessing internet%`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill = colors[7]) +
+  geom_text(aes(label = `population accessing internet%`), vjust = 0.5,hjust =1, size = 5,color = colors[1])+
+  labs(title = "Population accessing Internet% ~ Rural Counties",
        x = "County",
        y = "percentage (%)") +
   theme_minimal()+
   scale_fill_manual(values = colors)+
   coord_flip()+
-  theme(panel.grid = element_blank())
+  theme(panel.grid = element_blank())+
+  theme_hc()
 ```
 
 
-```{r fig.width=12,fig.height=8}
+```{r fig.width=12,fig.height=8, comment=NA}
 Internet_county<-kenya1 %>% 
   filter(Status =="Urban") %>% 
   select("County","Status","population accessing internet%") 
 
-fig8<-ggplot(Internet_county, aes(x = reorder(County,-`population accessing internet%`), y = `population accessing internet%`, fill = Status))+
-  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE,fill = '#BC5308') +
-  geom_text(aes(label = `population accessing internet%`), vjust = -0.5,hjust =0.5, size = 6)+
-  labs(title = "Population accessing Internet%",
+FIG8<-ggplot(Internet_county, aes(x = reorder(County,-`population accessing internet%`), y = `population accessing internet%`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE,fill = colors[1]) +
+  geom_text(aes(label = `population accessing internet%`), vjust = 0.5,hjust =1, size = 6,color =colors[7])+
+  labs(title = "Population accessing Internet% ~ Urban Counties",
        x = "County",
        y = "percentage (%)") +
   theme_minimal()+
   scale_fill_manual(values = colors)+
   coord_flip()+
-  theme(panel.grid = element_blank())
+  theme(panel.grid = element_blank())+
+  theme_hc()
 ```
 
+##Bargraphs showing accessibility to Internet (%) 
 
-```{r fig.width=12,fig.height=8}
-grid.arrange(fig7,fig8,ncol=1)
+```{r fig.width=12,fig.height=8, comment=NA}
+grid.arrange(FIG7,FIG8,ncol=2)
 ```
+Accessibility to the internet is a fundamental driver of the digital economy. The two provided graphs offer insights into the percentage of the population with internet access. Notably, West Pokot County has the lowest internet accessibility, standing at a mere 3.6%. In contrast, Nyeri County leads among rural counties with a 21.4% internet penetration rate.
+
+In the urban category, the capital city takes the lead with an impressive 43% internet accessibility, followed closely by Kiambu County at 40%. It's noteworthy that rural counties generally exhibit lower internet accessibility rates. These findings underscore the importance of bridging the digital divide to promote equitable access to the internet, which is essential for fostering the digital economy.
 
 
-```{r fig.width=12,fig.height=8}
+
+##Mobile Phone Ownership
+
+```{r fig.width=12,fig.height=8, comment=NA}
 mobile_phones<-kenya1 %>%
   filter(Status == "Rural") %>% 
   select("County","Status","population owning mobile phones%") 
 
-fig9<- ggplot(mobile_phones, aes(x = reorder(County, -`population owning mobile phones%`), y = `population owning mobile phones%`, fill = Status))+
-  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill ='#15616D') +
-  geom_text(aes(label = `population owning mobile phones%`), vjust = -0.5,hjust =0.5, size = 3)+
-  labs(title = "Population owning mobile phones%",
+FIG9<- ggplot(mobile_phones, aes(x = reorder(County, -`population owning mobile phones%`), y = `population owning mobile phones%`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill =colors[7]) +
+  geom_text(aes(label = `population owning mobile phones%`), vjust = 0.5,hjust =1, size = 5, color = colors[1])+
+  labs(title = "Population owning mobile phones% ~ Rural Counties",
        x = "County",
        y = "percentage (%)") +
   theme_minimal()+
@@ -754,15 +883,15 @@ fig9<- ggplot(mobile_phones, aes(x = reorder(County, -`population owning mobile 
 ```
 
 
-```{r fig.width=12,fig.height=8}
+```{r fig.width=12,fig.height=8, comment=NA}
 mobile_phones<-kenya1 %>%
   filter(Status == "Urban") %>% 
   select("County","Status","population owning mobile phones%") 
 
-fig10<- ggplot(mobile_phones, aes(x = reorder(County, -`population owning mobile phones%`), y = `population owning mobile phones%`, fill = Status))+
-  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill = '#BC5308') +
-  geom_text(aes(label = `population owning mobile phones%`), vjust = -0.5,hjust =0.5, size = 5)+
-  labs(title = "Population owning mobile phones%",
+FIG10<- ggplot(mobile_phones, aes(x = reorder(County, -`population owning mobile phones%`), y = `population owning mobile phones%`, fill = Status))+
+  geom_bar(stat = "identity", position = "dodge",show.legend = FALSE, fill = colors[1]) +
+  geom_text(aes(label = `population owning mobile phones%`), vjust = 0.5,hjust =1, size = 5,color = colors[7])+
+  labs(title = "Population owning mobile phones% ~ Urban Counties",
        x = "County",
        y = "percentage (%)") +
   theme_minimal()+
@@ -771,11 +900,17 @@ fig10<- ggplot(mobile_phones, aes(x = reorder(County, -`population owning mobile
 
 ```
 
-```{r}
+##Bargraphs showing ownership of mobile phones(%)
+
+```{r fig.width=12,fig.height=8, comment=NA}
 library(gridExtra)
-grid.arrange(fig9,fig10,ncol=1)
+grid.arrange(FIG9,FIG10,ncol=2)
 
 ```
+Mobile phone products and services have played a pivotal role in driving the economic development of communities. The provided graphs highlight significant disparities in mobile phone ownership across counties. Turkana County reports a relatively low mobile phone ownership rate, with only 16.6% of the population owning a mobile device. In sharp contrast, Nairobi leads the way with a substantial 69.1% of its population owning a mobile phone.
+
+These disparities in mobile phone ownership underscore the digital divide between regions and highlight the potential for mobile technology to contribute to economic growth and connectivity, especially in areas with lower adoption rates.
 
 # findings and conclusion
 
+In conclusion, the findings from the data presented reveal the critical role of infrastructure and technology in shaping the development landscape of communities. Access to essential services such as water, electricity, and the internet, along with mobile phone ownership, are pivotal factors influencing the economic well-being of regions. Notably, these findings challenge traditional urban-rural distinctions, as certain rural counties exhibit superior infrastructure and technology accessibility compared to urban counterparts. Bridging the digital and infrastructural divides is essential for fostering equitable development and ensuring that the benefits of the digital economy are accessible to all, regardless of geographic location. These insights underscore the need for targeted policies and investments to promote inclusive growth and sustainable development across diverse communities.
