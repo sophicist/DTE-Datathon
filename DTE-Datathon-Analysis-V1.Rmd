@@ -223,7 +223,7 @@ stats %>% kable()
  On average the  rural distribution is (Mean=696932.3 persons ,SD=367022) and urban population is (Mean=315073.8,SD=	689484.4)
  
  
-### Rural and urban population comparison for each county
+## Rural and urban population comparison for each county
 
 ```{r, fig.height=10,fig.width=12, comment=NA}
 DataRural <- df %>%
@@ -874,6 +874,8 @@ grid.arrange(FIG9,FIG10,ncol=2)
 
 ```
 
+
+Population distribution in the study by gender for each age group were varying slightly  across all the counties. The residence of the population are distributed across the rural areas and a few at the urban centre.
 
 Mobile phone products and services have played a pivotal role in driving the economic development of communities. The provided graphs highlight significant disparities in mobile phone ownership across counties. Turkana County reports a relatively low mobile phone ownership rate, with only 16.6% of the population owning a mobile device. In sharp contrast, Nairobi leads the way with a substantial 69.1% of its population owning a mobile phone.
 
