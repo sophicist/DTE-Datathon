@@ -3,9 +3,9 @@ title: "Rural Urban dynamics (DTE Datathon)"
 author: "Group 7"
 date: "2023-09-26"
 output:
-  pdf_document: default
-  word_document: default
   
+  word_document: default
+  pdf_document: default
 header-includes:
 - \usepackage{fancyhdr}
 - \usepackage{xcolor}
@@ -539,24 +539,34 @@ grid.arrange(fig1,fig2,ncol=1)
 ```{r,fig.height=10,fig.width=8, comment=NA}
 grid.arrange(fig3,fig4,ncol=1)
 ```
+Level 3 hospitals, often referred to as community or regional hospitals, occupy a vital position in the healthcare continuum.Level 3 hospitals are vital components of the healthcare landscape, offering comprehensive services, community-oriented care, and essential support for under-served areas. They bridge the gap between primary care and tertiary medical centers, ensuring that a wide range of patients can access quality healthcare close to home.Kisumu county leads with the highest number of level 2 hospitals at 4291. This mostly comprises of private hospitals.
+
 
 ## Bar charts showing Level 2 Hospital Distribution by counties
 
 ```{r,fig.height=10,fig.width=8, comment=NA}
 grid.arrange(fig5,fig6,ncol=1)
 ```
+Level 2 hospitals, often categorized as community hospitals or secondary care facilities, play a vital role in healthcare systems. They offer a range of essential medical services and serve as a bridge between primary care clinics and more specialized tertiary care centers.In Urban counties Nairobi has the highest number of level 2 hospitals at 771 followed by Kiambu county having 532 hospitals.In rural counties Meru has the highest number of level 2 hospitals at 464 hospitals followed by Nyeri at 364.
+
+
+
 
 ## Bar charts showing Hospital Bed density per 10000 population by counties
 
 ```{r,fig.height=10,fig.width=8, comment=NA}
 grid.arrange(fig7,fig8,ncol=1)
 ```
+Hospital beds are a fundamental resource in healthcare infrastructure, serving as a crucial measure of a healthcare system's capacity to provide care.An adequate supply of beds is essential for maintaining the health system's capacity, offering critical care, and enhancing overall healthcare resilience.Mombasa county has a higher bed density which is 33 per 10000 population.
+
+
 
 ## Barcharts showing Hospital worker per 10000 population Distribution by counties
 
 ```{r,fig.height=10,fig.width=8, comment=NA}
 grid.arrange(fig9,fig10,ncol=1)
 ```
+Health workers form the backbone of any healthcare system, playing a pivotal role in promoting and maintaining the well-being of a population. Their significance extends far beyond the walls of hospitals and clinics, as they are instrumental in addressing both routine healthcare needs and responding to emergencies, such as pandemics.Tharaka-Nithi and Nyeri which are rural counties have more(34 and 31 respectively) health workers per 10000 population compared to Urban counties which are being led by Uasin Gishu having 28 health workers per 10000 population.
 
 # Rural-Urban Education dynamics
 ## Primary school education
