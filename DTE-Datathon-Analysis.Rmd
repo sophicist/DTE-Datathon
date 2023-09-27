@@ -31,7 +31,9 @@ library(readxl)
 library(reshape2)
 library(janitor)
 library(ggthemes)
-
+library(leaflet)
+library(sf)
+library(ggplot2)
 library(knitr)
 # library(kableExtra)
 
@@ -94,10 +96,118 @@ The data collection process was primarily manual, and it followed the following 
 
 ## Rural-Urban health dynamics
 
+### Population distribution 
 
 ```{r}
-library(leaflet)
-library(sf)
+data<-read_excel("Dataset.xlsx",sheet="population distribution")
+
+data$Cohorts<-as.factor(data$Cohorts)
+data$Cohorts<-ifelse(data$Cohorts=="0-5","0-5",
+                     ifelse(data$Cohorts=="45091","6-14",
+                            ifelse(data$Cohorts=="15-35","15-35",
+                                   ifelse(data$Cohorts=="36-60","36-60","61+"))))
+data$Cohorts <- factor(data$Cohorts, levels = c("0-5", "6-14", "15-35", "36-60", "61+"))
+library(ggplot2)
+
+# Create a histogram of age cohort distribution
+ggplot(data, aes(x = Cohorts, y = Total)) +
+  geom_bar(stat = "identity", fill = '#15616D') +
+  # geom_text(aes(label = Total)) +
+  labs(x = "Age group ", y = "Population", title = "Age  Distribution for the Entire Country") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+Persons aged 15 to 35 years are majority indicating the high labour force and the least population in the country are those above 60 years.
+
+
+## The distribution of age groups in each county
+
+```{r, fig.height=6,fig.width=8}
+cohort_summary <- data %>%
+  group_by(County,Cohorts) %>%
+  summarise(Total_Population = round((sum(Total)/100000),3))
+
+# Create the bar graph
+ggplot(cohort_summary, aes(x = reorder(County, -Total_Population), y = Total_Population, fill = Cohorts)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "County", y = "Total Population '00000'", title = "Population by Cohorts Across Counties '00000'") +
+  scale_fill_discrete() +
+  theme_minimal() +
+  scale_fill_manual(values = colors) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+
+
+ Majority of the counties had a population less than one million across all the age groups
+
+
+## Population distribution for each county by each gender
+
+
+```{r, fig.height=10,fig.width=12}
+
+
+
+data_long <- data %>%
+  pivot_longer(cols = -c("County", "Cohorts", "Total", "male", "female"), names_to = "gender", values_to = "population")
+
+# Calculate Total population per County
+total_population <- data_long %>%
+  group_by(County) %>%
+  summarise(Total_Population = sum(population))
+
+# Reorder the levels of County based on Total population (descending order)
+data_long$County <- factor(data_long$County, levels = total_population$County[order(-total_population$Total_Population)])
+
+data_long %>%
+  group_by(County, gender) %>%
+  summarise(Totals = round((sum(population) / 100000), 2)) %>%
+  ggplot(aes(x = County, y = Totals, fill = gender)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = Totals), position = position_stack(vjust = 0.5), size = 3) +
+  labs(y = "Population '00000'", x = "County", title = "Gender Distribution by County in '00000'") +
+  scale_fill_manual(values = c("Female" = '#FFECD1', "Male" = '#15616D')) +
+  theme_minimal() +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 0.5))
+
+
+```
+
+Nairobi county has the highest population by both gender levels and Lamu county has the lowest population with more males than females.
+
+
+### Gender distribution across the age groups in the population.
+
+
+```{r, fig.height=6,fig.width=8}
+# Assuming you have already loaded and transformed your data into 'data_long' as described in your code
+
+data_long %>%
+  group_by( Cohorts, gender) %>%
+  summarise(Totals = round((sum(population) / 100000), 2)) %>%
+  ggplot(aes(x = Cohorts, y = Totals, fill = gender)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = Totals), position = position_dodge(width = 0.9), size = 3, vjust = -0.5) +
+  labs(y = "Population", x = "Age groups", title = "Gender Distribution by  Age Group in '00000'") +
+  scale_fill_manual(values = c("Female" = '#FFECD1', "Male" = '#15616D')) +
+  theme_minimal() +
+  
+  theme(axis.text.x = element_text(angle = 45, hjust = 0.5))
+
+  
+```
+
+  
+  
+  Female gender in the population were more in age groups 15to 35 years and above 60 years while contrast to male gender in the other age groups.
+  
+  
+```{r}
+
 
 # Load the shapefile
 kenya_counties <- st_read("LYNN ANALYSIS/County.shp")
@@ -165,7 +275,7 @@ level_5_6_hospitals <- kenya %>%
 
 ```{r,fig.height=12,fig.width=10}
 # Load the required libraries
-library(ggplot2)
+
 
 # Filter the data to include only rural counties
 kenya_rural <- kenya %>%
